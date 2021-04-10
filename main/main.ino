@@ -3,11 +3,15 @@
 LiquidCrystal lcd(8,9,4,5,6,7);
 
 const String lSpawserwis  = "  SPAW-SERWIS   ";
-const String lMode0       = "  CZYSZCZENIE   ";
-const String lMode1       = "  POLEROWANIE   ";
-const String lMode2       = "  ZNAKOWANIE    ";
-const String lWorkReady   = "Gotowy do pracy ";
-const char*  lWork        = " Praca:    %3d%% ";
+//const String lMode0       = "  CZYSZCZENIE   ";
+//const String lMode1       = "  POLEROWANIE   ";
+//const String lMode2       = "  ZNAKOWANIE    ";
+const String lMode0       = "CZYSZCZENIE   0%%";
+const String lMode55      = "CZYSZCZENIE  55%%";
+const String lMode75      = "CZYSZCZENIE  75%%";
+const String lMode100     = "CZYSZCZENIE 100%%";
+//const String lWorkReady   = "Gotowy do pracy ";
+//const char*  lWork        = " Praca:    %3d%% ";
 
 int resistorPin = A1;
 int currentResistorValue = 0;
@@ -27,48 +31,48 @@ int mode1Pin = 12; //numer pinu na Polerowanie
 int mode2Pin = 13; //numer pinu na Znakowanie
 
 int banerClock = 10000; //co jaki czas (ms) ma się pojawiać baner Spaw-serwis
-int banerDuration = 500; // jak długo (ms) ma się wyświetlać baner
+int banerDuration = 2000; // jak długo (ms) ma się wyświetlać baner
 
 void setup() {
   int start = millis();
   Serial.begin(9600);
   Serial.println("Starting");
-  
+ 
   lcd.begin(16, 2);
 
   pinMode(resistorPin, INPUT);
   pinMode(keyPadPin, INPUT);
-  
+ 
   pinMode(mode0Pin, OUTPUT);
   pinMode(mode1Pin, OUTPUT);
   pinMode(mode2Pin, OUTPUT);
 
   screen0_animate();
   screen0_main();
-  screen1_readyToWork();
+//  screen1_readyToWork();
   int end = millis();
-  
+ 
   Serial.println("Started in " + String(end - start) + " ms");
 }
 
 void loop() {
-  handleResistor();
+//  handleResistor();
   handleKeyPad();
   handleScreen0();
   handleScreen1();
 }
 
-void handleResistor() {
-  const int tolerance = 10;
-  currentResistorValue = analogRead(resistorPin);
-  if ( abs(lastResistorValue - currentResistorValue) > tolerance ) {
-    lastResistorValue = currentResistorValue;
-    Serial.print("currentResistorValue: ");
-    Serial.println(currentResistorValue);
-    Serial.print("lastResistorValue: ");
-    Serial.println(lastResistorValue);
-  }
-}
+//void handleResistor() {
+//  const int tolerance = 10;
+//  currentResistorValue = analogRead(resistorPin);
+//  if ( abs(lastResistorValue - currentResistorValue) > tolerance ) {
+//    lastResistorValue = currentResistorValue;
+//    Serial.print("currentResistorValue: ");
+//    Serial.println(currentResistorValue);
+//    Serial.print("lastResistorValue: ");
+//    Serial.println(lastResistorValue);
+//  }
+//}
 
 void handleScreen0() {
   int currentMillis = millis() % banerClock;
@@ -77,26 +81,40 @@ void handleScreen0() {
     if ( (currentMillis / banerClock) > 0) {
       currentMillis = 0;
     }
-  } else {
-    if (mode == 0) {
-      screen0_mode0();
-    } else if (mode == 1) {
-      screen0_mode1();
-    } else if (mode == 2) {
-      screen0_mode2();
-    } else {
-      Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0"); 
-      mode = 0;
-    }
+  }
+  else {
+//    if (mode == 0) {
+//      screen0_mode0();
+//    } else if (mode == 1) {
+//      screen0_mode1();
+//    } else if (mode == 2) {
+//      screen0_mode2();
+//    } else {
+//      Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0");
+//      mode = 0;
+//    }
+    handleScreen1();
   }
 }
 
 void handleScreen1() {
-  if (mapResistorValueToPercent() == 0) {
-    screen1_readyToWork();
-  } else {
-    screen1_work(); 
-  }
+//  if (mapResistorValueToPercent() == 0) {
+//    screen1_readyToWork();
+//  } else {
+//    screen1_work();
+//  }
+    if (mode == 0) {
+      screen1_mode0();
+    } else if (mode == 55) {
+      screen1_mode55();
+    } else if (mode == 75) {
+      screen1_mode75();
+    } else if (mode == 100) {
+      screen1_mode100();
+    } else {
+      Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0");
+      mode = 0;
+    }
 }
 
 void screen0_animate() {
@@ -123,30 +141,34 @@ void screen0_main() {
   lcd.print(String(lSpawserwis));
 }
 
-void screen0_mode0() {
-  lcd.setCursor(0, 0);
+void screen1_mode100() {
+  lcd.setCursor(0, 1);
+  lcd.print(String(lMode100));
+}
+void screen1_mode75() {
+  lcd.setCursor(0, 1);
+  lcd.print(String(lMode75));
+}
+void screen1_mode55() {
+  lcd.setCursor(0, 1);
+  lcd.print(String(lMode55));
+}
+void screen1_mode0() {
+  lcd.setCursor(0, 1);
   lcd.print(String(lMode0));
 }
-void screen0_mode1() {
-  lcd.setCursor(0, 0);
-  lcd.print(String(lMode1));
-}
-void screen0_mode2() {
-  lcd.setCursor(0, 0);
-  lcd.print(String(lMode2));
-}
 
-void screen1_readyToWork() {
-  lcd.setCursor(0, 1);
-  lcd.print(String(lWorkReady));
-}
+//void screen1_readyToWork() {
+//  lcd.setCursor(0, 1);
+//  lcd.print(String(lWorkReady));
+//}
 
-void screen1_work() {
-  char buffer[16];
-  sprintf(buffer, lWork, mapResistorValueToPercent());
-  lcd.setCursor(0, 1);
-  lcd.print(buffer);
-}
+//void screen1_work() {
+//  char buffer[16];
+//  sprintf(buffer, lWork, mapResistorValueToPercent());
+//  lcd.setCursor(0, 1);
+//  lcd.print(buffer);
+//}
 
 int mapResistorValueToPercent() {
   int tmp = ((long)currentResistorValue * 100) / resistorMaxValue;
@@ -171,16 +193,16 @@ void handleKeyPad() {
 
 void pressedRight() {
   Serial.println("Prawo");
-  setMode(2);
+  setMode(55);
 }
 
 void pressedUp() {
   Serial.println("Gora");
-  setMode(0);
+  setMode(100);
 }
 void pressedDown() {
   Serial.println("Dol");
-  setMode(1);
+  setMode(75);
 }
 void pressedLeft() {
   Serial.println("Lewo");
@@ -194,23 +216,23 @@ void idle() {
 
 void setMode(int modeTmp) {
   mode = modeTmp;
-  if (mode == 0) {
+  if (mode == 100) {
     Serial.println("Set mode: " + String(mode));
     digitalWrite(mode0Pin, HIGH);
     digitalWrite(mode1Pin, LOW);
     digitalWrite(mode2Pin, LOW);
-  } else if (mode == 1) {
+  } else if (mode == 75) {
     Serial.println("Set mode: " + String(mode));
-    digitalWrite(mode0Pin, LOW);
+    digitalWrite(mode0Pin, HIGH);
     digitalWrite(mode1Pin, HIGH);
     digitalWrite(mode2Pin, LOW);
-  } else if (mode == 2) {
+  } else if (mode == 55) {
     Serial.println("Set mode: " + String(mode));
-    digitalWrite(mode0Pin, LOW);
-    digitalWrite(mode1Pin, LOW);
+    digitalWrite(mode0Pin, HIGH);
+    digitalWrite(mode1Pin, HIGH);
     digitalWrite(mode2Pin, HIGH);
   } else {
-    Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0"); 
+    Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0");
     mode = 0;
   }
 }
