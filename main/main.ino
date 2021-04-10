@@ -37,12 +37,12 @@ void setup() {
   int start = millis();
   Serial.begin(9600);
   Serial.println("Starting");
- 
+  
   lcd.begin(16, 2);
 
   pinMode(resistorPin, INPUT);
   pinMode(keyPadPin, INPUT);
- 
+  
   pinMode(mode0Pin, OUTPUT);
   pinMode(mode1Pin, OUTPUT);
   pinMode(mode2Pin, OUTPUT);
@@ -51,7 +51,7 @@ void setup() {
   screen0_main();
 //  screen1_readyToWork();
   int end = millis();
- 
+  
   Serial.println("Started in " + String(end - start) + " ms");
 }
 
@@ -81,7 +81,7 @@ void handleScreen0() {
     if ( (currentMillis / banerClock) > 0) {
       currentMillis = 0;
     }
-  }
+  } 
   else {
 //    if (mode == 0) {
 //      screen0_mode0();
@@ -90,7 +90,7 @@ void handleScreen0() {
 //    } else if (mode == 2) {
 //      screen0_mode2();
 //    } else {
-//      Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0");
+//      Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0"); 
 //      mode = 0;
 //    }
     handleScreen1();
@@ -101,7 +101,7 @@ void handleScreen1() {
 //  if (mapResistorValueToPercent() == 0) {
 //    screen1_readyToWork();
 //  } else {
-//    screen1_work();
+//    screen1_work(); 
 //  }
     if (mode == 0) {
       screen1_mode0();
@@ -112,7 +112,7 @@ void handleScreen1() {
     } else if (mode == 100) {
       screen1_mode100();
     } else {
-      Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0");
+      Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0"); 
       mode = 0;
     }
 }
@@ -177,17 +177,17 @@ int mapResistorValueToPercent() {
 }
 
 void handleKeyPad() {
-  const int tolerance = 100;
+  const int tolerance = 10;
   currentKeyPad = analogRead(keyPadPin);
+//  Serial.println("[TRACE] currentKeyPad: " + String(currentKeyPad));
   if ( abs(oldKeyPad - currentKeyPad) > tolerance ) {
     oldKeyPad = currentKeyPad;
-//    Serial.println(currentKeyPad);
-    if ( currentKeyPad >= 0 && currentKeyPad < 100 ) pressedRight();
-    if ( currentKeyPad >= 100 && currentKeyPad < 250 ) pressedUp();
-    if ( currentKeyPad >= 250 && currentKeyPad < 400 ) pressedDown();
-    if ( currentKeyPad >= 400 && currentKeyPad < 600 ) pressedLeft();
-    if ( currentKeyPad >= 600 && currentKeyPad < 1000 ) pressedSelect();
-    if ( currentKeyPad >= 1000 ) idle();
+    if ( currentKeyPad >= 0 && currentKeyPad < 50 ) pressedRight();
+    if ( currentKeyPad >= 50 && currentKeyPad < 170 ) pressedUp();
+    if ( currentKeyPad >= 170 && currentKeyPad < 330 ) pressedDown();
+    if ( currentKeyPad >= 330 && currentKeyPad < 520 ) pressedLeft();
+    if ( currentKeyPad >= 520 && currentKeyPad < 800 ) pressedSelect();
+    if ( currentKeyPad >= 800 ) idle();
   }
 }
 
@@ -232,7 +232,7 @@ void setMode(int modeTmp) {
     digitalWrite(mode1Pin, HIGH);
     digitalWrite(mode2Pin, HIGH);
   } else {
-    Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0");
+    Serial.println("[ERROR] Unsupported mode: " + String(mode) + "; Reseting to 0"); 
     mode = 0;
   }
 }
